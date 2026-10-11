@@ -1,0 +1,53 @@
+# =====================================================================
+#                        Grants - main settings
+# ---------------------------------------------------------------------
+#  Other files in this folder:
+#    messages.yml   - every chat message + /grants help
+#    gui.yml        - menu titles, items, names, lore and slots
+#    ranks.yml      - wool colour per rank + ranks hidden from the menu
+#    durations.yml  - the time buttons in the duration menu
+#    reasons.yml    - the reason buttons in the reason menu
+#    database.yml   - local file or shared MySQL database (cross-server sync)
+#    grants.yml     - saved grant history when database.yml uses "local"
+#
+#  After editing any file, run /grants reload
+# =====================================================================
+
+# How dates are shown, e.g. "11 Oct 2026, 05:30 PM IST".
+# dd = day, MMM = month name, yyyy = year, hh:mm = time, a = AM/PM, z = timezone
+date-format: "dd MMM yyyy, hh:mm a z"
+
+# Timezone for dates, e.g. "Asia/Kolkata", "Europe/London", "America/New_York".
+# Leave empty to use the server's own timezone.
+timezone: ""
+
+# The LuckPerms rank every player has. Shown as grey wool on the far right of /grants history.
+default-group: "default"
+
+# Staff can only grant/remove ranks with a LOWER weight than their own rank.
+# (The player with the heaviest rank on the server can grant everything.)
+# Set rank weights with: /lp group <rank> setweight <number>
+rank-hierarchy:
+  enabled: true
+
+# Send the player a "Your rank has now been set to..." message when they get a rank.
+notify-player: true
+
+# Record ranks given/removed with /lp in /grants history too.
+lp-tracking:
+  enabled: true
+  # Reason shown for ranks given with /lp by a player.
+  command-reason: "Done By LuckPerms Command"
+  # Reason shown for ranks given with /lp from the console.
+  console-reason: "Rank Given By Console"
+
+# The word players type in chat to back out of typing a custom duration or reason.
+cancel-word: "cancel"
+
+# Sounds. Use Minecraft sound names, e.g. "ui.button.click", "entity.player.levelup".
+# Set a sound to "" to turn just that one off.
+sounds:
+  enabled: true
+  click: "ui.button.click"
+  success: "entity.player.levelup"
+  error: "entity.villager.no"

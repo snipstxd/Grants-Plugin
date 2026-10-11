@@ -1,0 +1,45 @@
+# =====================================================================
+#                        Grants - database
+# ---------------------------------------------------------------------
+#  Where grant history is stored, and how servers share it.
+#
+#  To share history AND "Your rank has now been set to..." messages
+#  between servers (e.g. lobby + practice), every server must point at
+#  the SAME MySQL / MariaDB / PostgreSQL database with the SAME
+#  table-prefix. The easiest way: leave use-luckperms-settings on true
+#  on every server - they'll all use the database LuckPerms uses.
+#
+#  Changes here need a server restart (not /grants reload).
+# =====================================================================
+
+# true  = copy the connection details below from plugins/LuckPerms/config.yml
+#         on every startup (so this file always matches LuckPerms).
+# false = use the details below exactly as typed.
+use-luckperms-settings: true
+
+# local       - this server only, saved in plugins/Grants/grants.yml
+# mysql       - MySQL
+# mariadb     - MariaDB
+# postgresql  - PostgreSQL
+# (If LuckPerms uses H2, SQLite, MongoDB or flat files, Grants uses "local".)
+type: local
+
+# host, or host:port
+address: localhost
+database: minecraft
+username: root
+password: ''
+
+# Grants' tables are called <table-prefix>history and <table-prefix>messages.
+# Every server must use the same prefix to share history.
+table-prefix: 'grants_'
+
+# Extra connection options (same as LuckPerms' pool-settings -> properties).
+properties:
+  useUnicode: true
+  characterEncoding: utf8
+  useSSL: false
+  verifyServerCertificate: false
+
+# How often (in seconds) each server checks for messages sent from other servers.
+sync-interval: 2

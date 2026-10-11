@@ -1,0 +1,20 @@
+# =====================================================================
+#                        Grants - ranks
+# =====================================================================
+
+# Wool colour of each rank in the /grants add menu. Ranks not listed use white.
+# Easiest way to change: /grants color <rank> <color>
+# With a shared database (database.yml), /grants color updates every server instantly.
+# If you edit this list by hand instead, use /grants color for ranks that already have a
+# colour - the database's colour wins for those on startup and /grants reload.
+# Colours: white, orange, magenta, light_blue, yellow, lime, pink, gray,
+#          light_gray, cyan, purple, blue, brown, green, red, black
+# Example:
+#   colors:
+#     owner: red
+#     manager: cyan
+colors: {}
+
+# Ranks that never show up in the /grants add menu.
+hidden:
+  - default

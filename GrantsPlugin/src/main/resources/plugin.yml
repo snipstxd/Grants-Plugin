@@ -1,0 +1,32 @@
+name: Grants
+version: 1.1.1
+main: dev.grants.GrantsPlugin
+api-version: '1.13'
+depend: [LuckPerms]
+description: GUI-based rank granting on top of LuckPerms.
+
+commands:
+  grants:
+    description: Grant, remove and view rank grants.
+    usage: /grants <add|remove|history|color|reload>
+
+permissions:
+  grants.admin:
+    description: Access to every /grants command.
+    default: op
+    children:
+      grants.add: true
+      grants.remove: true
+      grants.history: true
+      grants.color: true
+      grants.reload: true
+  grants.add:
+    default: op
+  grants.remove:
+    default: op
+  grants.history:
+    default: op
+  grants.color:
+    default: op
+  grants.reload:
+    default: op

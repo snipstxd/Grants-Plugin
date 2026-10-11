@@ -1,0 +1,91 @@
+# =====================================================================
+#                        Grants - chat messages
+# ---------------------------------------------------------------------
+#  Colours: &a &b &c ...  bold &l  italic &o  reset &r  hex &#55FFFF
+#  Set any message to "" to turn it off.
+#  Words in {curly brackets} are filled in by the plugin:
+#    {player}   player name (coloured like their rank, where it says so)
+#    {rank}     rank name          {prefix}   rank prefix from LuckPerms
+#    {duration} e.g. "1 day"       {reason}   grant reason
+# =====================================================================
+
+# Put in front of every message below.
+prefix: "&8&l[&b&lGrants&8&l]&r "
+
+# --- Granting ------------------------------------------------------
+# {player} is coloured like the player's name was BEFORE the grant.
+granted: "&aSuccessfully Granted {player} &arank {prefix} &afor: &c{duration} &areason: &f{reason}"
+# Sent to the player who got the rank (if online). Turn off in config.yml -> notify-player.
+rank-set: "&aYour rank has now been set to {prefix}"
+rank-set-temp: "&aYour rank has now been set to {prefix} &afor: &c{duration}"
+rank-too-high: "&cYou can't grant ranks higher than your own rank!"
+# {player} is coloured like the player's current rank.
+already-granted: "&cThis rank is already granted to {player}"
+no-ranks: "&cThere are no LuckPerms ranks to grant."
+
+# --- Typing a custom duration / reason in chat ----------------------
+# {cancel} is the cancel word from config.yml
+enter-duration: "&eType the duration in chat (e.g. &f30m&e, &f2h&e, &f7d&e, &f1d12h&e). Type &c{cancel} &eto go back."
+invalid-duration: "&c'&f{input}&c' is not a valid duration. Try again, or type &f{cancel}&c."
+enter-reason: "&eType the reason in chat. Type &c{cancel} &eto go back."
+
+# --- Removing -------------------------------------------------------
+# {player} is coloured like the player's name was BEFORE the removal.
+removed: "&aRemoved {prefix} &afrom {player} &asuccessfully."
+remove-too-high: "&cYou can't remove ranks higher than your own rank!"
+grant-not-active: "&cThat grant is no longer active."
+no-active-grants: "&f{player} &chas no active grants."
+
+# --- /grants color --------------------------------------------------
+color-set: "&aWool colour for &f{rank} &ais now &f{color}&a."
+unknown-rank: "&cThere is no LuckPerms rank called &f{rank}&c."
+unknown-color: "&cUnknown colour &f{color}&c. Options: &f{colors}"
+
+# --- General --------------------------------------------------------
+player-not-found: "&cCould not find a player named &f{player}&c."
+players-only: "&cOnly players can use this command."
+reloaded: "&aAll Grants files reloaded."
+error: "&cSomething went wrong talking to LuckPerms. Check the console."
+# {label} is the command typed (grants), {command} is add/remove/history
+usage-player: "&cUsage: /{label} {command} <player>"
+usage-color: "&cUsage: /{label} color <rank> <color>"
+
+# --- /grants help ---------------------------------------------------
+# Each section only shows to players who have permission for that command.
+# These are sent without the prefix above.
+help:
+  header:
+    - "&b&lGrants Help"
+  add:
+    - "&b/{label} add <player>"
+    - "  &7Opens a menu of your LuckPerms ranks. Pick a rank, then a duration"
+    - "  &7(5m, 10m, 1h, 1d, 5d, permanent or custom), then a reason, then confirm."
+  remove:
+    - "&b/{label} remove <player>"
+    - "  &7Shows the player's active grants. Click one, then the lime concrete"
+    - "  &7to confirm removing it (red concrete cancels)."
+  history:
+    - "&b/{label} history <player>"
+    - "  &7Shows every grant: &aactive &7(green), &cexpired/removed &7(red),"
+    - "  &7and the default rank (grey). Hover for details."
+  color:
+    - "&b/{label} color <rank> <color>"
+    - "  &7Sets the wool colour a rank shows in the add menu, e.g. red, cyan."
+  reload:
+    - "&b/{label} reload"
+    - "  &7Reloads every Grants file."
+  footer:
+    - "&b/{label} info &7- plugin info"
+    - "&b/{label} help &7- this page"
+
+# --- Time words used in durations ("1 day 2 hours") -----------------
+time:
+  permanent: "Permanent"
+  day: "day"
+  days: "days"
+  hour: "hour"
+  hours: "hours"
+  minute: "minute"
+  minutes: "minutes"
+  second: "second"
+  seconds: "seconds"

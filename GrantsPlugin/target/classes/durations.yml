@@ -1,0 +1,19 @@
+# =====================================================================
+#                        Grants - durations
+# ---------------------------------------------------------------------
+#  The time buttons in the duration menu (up to 26).
+#  "Permanent" and "Custom" buttons are always added after these.
+#
+#  Units:  s = seconds   m = minutes   h = hours   d = days
+#          w = weeks     mo = months   y = years
+#  Combine them like 1d12h or 2h30m.
+#
+#  Look of the buttons is in gui.yml -> duration
+# =====================================================================
+
+presets:
+  - 5m
+  - 10m
+  - 1h
+  - 1d
+  - 5d

@@ -1,0 +1,17 @@
+# =====================================================================
+#                        Grants - reasons
+# ---------------------------------------------------------------------
+#  The reason buttons in the reason menu (up to 27).
+#  A "Custom Reason" button is always added after these.
+#
+#  Look of the buttons is in gui.yml -> reason
+# =====================================================================
+
+reasons:
+  - Famous
+  - Promoted
+  - Demoted
+  - Media
+  - Staff
+  - Purchased
+  - Event Winner

@@ -1,0 +1,229 @@
+# =====================================================================
+#                        Grants - menus
+# ---------------------------------------------------------------------
+#  Colours:   &a &b &c ...  bold &l  italic &o  hex &#55FFFF
+#  material:  any item name, e.g. BOOK, LIME_CONCRETE, DIAMOND, NAME_TAG
+#             full list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+#  slot:      0 = top-left square, 8 = top-right, 9 = first square of row 2, ...
+#  lore:      the description lines under an item's name. Use "" for an empty line.
+#  Words in {curly brackets} are filled in by the plugin - each section
+#  lists the ones you can use there.
+# =====================================================================
+
+# Shown wherever a rank has no prefix.
+no-prefix: "&8None"
+
+# Page buttons, only used when a menu has more than 54 items.
+# {page} {pages}
+navigation:
+  previous:
+    material: ARROW
+    name: "&ePrevious Page"
+    lore:
+      - "&7Page {page}/{pages}"
+  next:
+    material: ARROW
+    name: "&eNext Page"
+    lore:
+      - "&7Page {page}/{pages}"
+  close:
+    material: BARRIER
+    name: "&cClose"
+    lore: []
+
+# ---------------------------------------------------------------------
+# /grants add  ->  step 1: pick a rank
+# {player} {rank} {prefix} {weight}
+# The wool colour of each rank is set in ranks.yml
+# ---------------------------------------------------------------------
+rank-select:
+  title: "&8Grant a rank to {player}"
+  rank:
+    name: "&f&l{rank}"
+    lore:
+      - "&7Prefix: {prefix}"
+      - ""
+      - "{action}"
+  # What {action} becomes:
+  action-allowed: "&eClick to select"
+  action-locked: "&cHigher than your rank"
+  action-owned: "&cAlready granted"
+
+# ---------------------------------------------------------------------
+# /grants add  ->  step 2: pick a duration
+# {player} {rank} {prefix} {duration}
+# The time buttons themselves are listed in durations.yml
+# ---------------------------------------------------------------------
+duration:
+  title: "&8Select a duration"
+  header:
+    slot: 4
+    material: NAME_TAG
+    name: "&f&l{player}"
+    lore:
+      - "&7Rank: {prefix}"
+  preset:
+    material: CLOCK
+    name: "&e{duration}"
+    lore:
+      - ""
+      - "&eClick to select"
+  permanent:
+    material: NETHER_STAR
+    name: "&b&lPermanent"
+    lore:
+      - "&7Never expires."
+      - ""
+      - "&eClick to select"
+  custom:
+    material: OAK_SIGN
+    name: "&d&lCustom Duration"
+    lore:
+      - "&7Type any duration in chat,"
+      - "&7e.g. &f30m&7, &f2h&7, &f1d12h&7, &f2w"
+      - ""
+      - "&eClick to enter"
+  back:
+    material: ARROW
+    name: "&7Back"
+    lore: []
+
+# ---------------------------------------------------------------------
+# /grants add  ->  step 3: pick a reason
+# {player} {rank} {prefix} {duration} {reason}
+# The reason buttons themselves are listed in reasons.yml
+# ---------------------------------------------------------------------
+reason:
+  title: "&8Select a reason"
+  header:
+    slot: 4
+    material: NAME_TAG
+    name: "&f&l{player}"
+    lore:
+      - "&7Rank: {prefix}"
+      - "&7Duration: &c{duration}"
+  preset:
+    material: PAPER
+    name: "&e{reason}"
+    lore:
+      - ""
+      - "&eClick to select"
+  custom:
+    material: WRITABLE_BOOK
+    name: "&d&lCustom Reason"
+    lore:
+      - "&7Type any reason in chat."
+      - ""
+      - "&eClick to enter"
+  back:
+    material: ARROW
+    name: "&7Back"
+    lore: []
+
+# ---------------------------------------------------------------------
+# /grants add  ->  step 4: confirm
+# {player} {rank} {prefix} {duration} {reason}
+# rows: how tall the menu is (1-6)
+# ---------------------------------------------------------------------
+confirm-grant:
+  title: "&8Confirm this grant?"
+  rows: 3
+  cancel:
+    slot: 11
+    material: RED_CONCRETE
+    name: "&c&lCancel"
+    lore:
+      - "&7Go back without granting."
+  info:
+    slot: 13
+    material: BOOK
+    name: "&f&l{rank}"
+    lore:
+      - "&7Player: &f{player}"
+      - "&7Prefix: {prefix}"
+      - "&7Duration: &c{duration}"
+      - "&7Reason: &f{reason}"
+  confirm:
+    slot: 15
+    material: LIME_CONCRETE
+    name: "&a&lConfirm"
+    lore:
+      - "&7Grant {rank} to {player}."
+
+# ---------------------------------------------------------------------
+# How one grant looks in /grants history and /grants remove
+# {rank} {prefix} {player} {status} {granted_by} {granted_on}
+# {expires_on} {reason} {ended_on} {removed_by}
+# ---------------------------------------------------------------------
+grant-item:
+  active:
+    material: GREEN_WOOL
+    name: "&a&l{rank}"
+  expired:
+    material: RED_WOOL
+    name: "&c&l{rank}"
+  lore:
+    - "&7Prefix: {prefix}"
+    - "&7Status: {status}"
+    - "&7Granted by: &f{granted_by}"
+    - "&7Granted on: &f{granted_on}"
+    - "&7Expires on: &f{expires_on}"
+    - "&7Reason: &f{reason}"
+  # Added only for grants that ran out on their own:
+  expired-line: "&7Expired on: &f{ended_on}"
+  # Added only for grants someone removed:
+  removed-line: "&7Removed by: &f{removed_by} &7on: &f{ended_on}"
+  # What {status} and {expires_on} can become:
+  status-active: "&aActive"
+  status-expired: "&cExpired"
+  never-expires: "Never"
+
+# ---------------------------------------------------------------------
+# /grants history
+# {player}   (default-rank item: {rank} {prefix})
+# ---------------------------------------------------------------------
+history:
+  title: "&8Grant history: {player}"
+  # Always in the bottom-right corner.
+  default-rank:
+    material: GRAY_WOOL
+    name: "&7&l{rank}"
+    lore:
+      - "&7Prefix: {prefix}"
+      - "&7Status: &8Default"
+      - "&7Every player has this rank."
+
+# ---------------------------------------------------------------------
+# /grants remove
+# {player}
+# ---------------------------------------------------------------------
+remove:
+  title: "&8Remove a grant: {player}"
+  # Added under each grant's description.
+  extra-lore:
+    - ""
+    - "&cClick to remove"
+
+# ---------------------------------------------------------------------
+# /grants remove  ->  confirm
+# {player} {rank} + everything from grant-item for the info item
+# The info item uses the name/description from grant-item above.
+# ---------------------------------------------------------------------
+confirm-remove:
+  title: "&8Remove this grant?"
+  rows: 3
+  cancel:
+    slot: 11
+    material: RED_CONCRETE
+    name: "&c&lCancel"
+    lore:
+      - "&7Go back without removing."
+  info:
+    slot: 13
+    material: BOOK
+  confirm:
+    slot: 15
+    material: LIME_CONCRETE
+    name: "&a&lConfirm"
+    lore:
+      - "&7Remove {rank} from {player}."
