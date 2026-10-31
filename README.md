@@ -93,20 +93,72 @@ After editing any file, run `/grants reload`. (`database.yml` and the Discord `e
 
 ## Permissions
 
-| Permission | Gives access to | Default |
+| Permission (on LuckPerms) | What it allows | Default |
 |---|---|---|
-| `grants.admin` | Every command below | op |
-| `grants.add` | `/grants add` | op |
-| `grants.remove` | `/grants remove` | op |
-| `grants.history` | `/grants history` | op |
-| `grants.color` | `/grants color` | op |
-| `grants.reload` | `/grants reload` | op |
+| **`grants.add`** | `/grants add <player>`: opens the menus to give someone a rank. | op |
+| **`grants.remove`** | `/grants remove <player>`: removes someone's active grants through the confirm screen. | op |
+| **`grants.history`** | `/grants history <player>`: views someone's grant history (green active, red expired or removed, grey default rank). | op |
+| **`grants.color`** | `/grants color <rank> <color>`: changes a rank's wool colour in the add menu. With a shared database, the change reaches every server. | op |
+| **`grants.reload`** | `/grants reload`: reloads the plugin's `.yml` files after you edit them. | op |
+| **`grants.admin`** | All five above in one permission. | op |
 
-Example: let moderators view history only:
+### How they work together
+
+- **`/grants help` and `/grants info`:** anyone with at least one of the five command permissions can use `/grants help`, and it only lists the commands they're allowed to use. Anyone without any of them who types any `/grants` command just sees the `/grants info` text.
+- **The rank-weight limit still applies.** Even with `grants.add` or `grants.remove`, staff can only grant or remove ranks with a lower weight than their own. For example, an admin (80) can't touch manager (90) or owner (100). Only whoever holds your highest-weight rank can grant every rank, and no permission skips this. You can turn the limit off in `config.yml` under `rank-hierarchy`.
+- **OPs:** they have all five command permissions by default, but they're still limited by rank weight.
+
+### Giving permissions with LuckPerms
+
+**With commands:**
 
 ```
+# Give a rank one permission
 /lp group mod permission set grants.history true
+
+# Give a rank every Grants command
+/lp group admin permission set grants.admin true
+
+# Give a single player a permission
+/lp user Steve permission set grants.add true
+
+# Take a permission away
+/lp group mod permission unset grants.history
+
+# Give a permission for a limited time (e.g. 7 days)
+/lp group helper permission settemp grants.history true 7d
+
+# Only on one server (if you set "server" in LuckPerms' config.yml)
+/lp group mod permission set grants.add true server=practice
 ```
+
+**With the web editor:**
+
+1. Run `/lp editor` in game or in the console. LuckPerms gives you a link.
+2. Open the link and click the group (e.g. `mod`) or user on the left.
+3. In the **Add permission** box at the bottom, type the permission (e.g. `grants.add`), keep the value **true**, and click **Add**. Add as many as you want.
+4. Click **Save** at the top. LuckPerms shows a command like `/lp applyedits <code>`.
+5. Run that command in game or in the console to apply the changes.
+
+**Setting rank weights** (needed for the rank-weight limit):
+
+```
+/lp group owner setweight 100
+/lp group manager setweight 90
+/lp group admin setweight 80
+/lp group mod setweight 50
+```
+
+You can also set the weight in `/lp editor` by clicking the group and changing its **weight** field.
+
+**Example staff setup:**
+
+| Rank | Weight | Permissions | Can grant |
+|---|---|---|---|
+| owner | 100 | `grants.admin` | Every rank |
+| manager | 90 | `grants.admin` | Ranks below 90 |
+| admin | 80 | `grants.add`, `grants.remove`, `grants.history` | Ranks below 80 |
+| mod | 50 | `grants.history` | Nothing, history only |
 
 ---
 
