@@ -1,0 +1,120 @@
+# =====================================================================
+#                        Grants - Discord bot
+# ---------------------------------------------------------------------
+#  Lets staff grant, remove and view ranks from Discord with:
+#    /grants add <player> <rank> <duration> <reason>
+#    /grants remove <player> <rank>
+#    /grants history <player>
+#
+#  Setup:
+#   1. https://discord.com/developers/applications -> New Application -> Bot
+#      -> Reset Token, and paste the token below.
+#   2. OAuth2 -> URL Generator: tick "bot" and "applications.commands",
+#      open the link and add the bot to each of your Discord servers.
+#   3. In Discord: Settings -> Advanced -> Developer Mode on. Then right-click
+#      a server icon -> Copy Server ID, right-click a role (Server Settings
+#      -> Roles) -> Copy Role ID, and right-click a channel -> Copy Channel ID.
+#   4. Set enabled to true and restart the server.
+#
+#  enabled and token need a server restart.
+#  Everything else is picked up by /grants reload.
+# =====================================================================
+
+# ------------------------------- MAIN SETTINGS -------------------------------
+
+enabled: false
+
+# Keep this secret! Anyone with it can control your bot.
+token: ""
+
+# Channel where every grant and removal is posted (in-game AND Discord). Empty = no log.
+# The bot needs "View Channel", "Send Messages" and "Embed Links" there.
+log-channel-id: ""
+
+# The Discord servers the commands work in. Each one has its own roles.
+#   name          - shown at the bottom of log messages for grants made from this Discord
+#   guild-id      - the Discord server's ID. Leave empty to not use that entry.
+#   allowed-roles - members need at least one of these roles (keep the quotes around each ID)
+# Need a third server? Copy one of the blocks below and give it a new key (e.g. "events:").
+discord-servers:
+  main:
+    name: "Main Discord"
+    guild-id: ""
+    allowed-roles:
+      - "000000000000000000"
+  staff:
+    name: "Staff Discord"
+    guild-id: ""
+    allowed-roles:
+      - "000000000000000000"
+
+# ------------------------------ EVERYTHING ELSE ------------------------------
+
+# What "granted by" / "removed by" shows for changes made from Discord.
+# {user} = Discord username, {name} = their nickname on that Discord server
+actor-name: "{user} (Discord)"
+
+# true = only the person who used the command sees the bot's reply.
+private-replies: false
+
+# The grant log (log-channel-id above).
+log:
+  # Also log ranks given with /lp (uses the reasons from config.yml -> lp-tracking).
+  luckperms-commands: true
+  # Shown at the bottom of log messages for in-game (and /lp) changes.
+  # Changes made from Discord show that Discord's name instead (discord-servers -> name).
+  # true  = use the "server" setting from plugins/LuckPerms/config.yml (e.g. server: ffa).
+  #         If LuckPerms still has the default "global", server-name below is used instead.
+  # false = always use server-name below.
+  use-luckperms-server-name: true
+  # e.g. "FFA". Empty = nothing.
+  server-name: ""
+  granted-title: "Rank Granted"
+  removed-title: "Rank Removed"
+  # Hex colours of the bar on the left of each message.
+  granted-color: "#55FF55"
+  removed-color: "#FF5555"
+  # Field names.
+  player: "Player"
+  rank: "Rank"
+  duration: "Duration"
+  expires: "Expires"
+  reason: "Reason"
+  granted-by: "Granted By"
+  removed-by: "Removed By"
+  never: "Never"
+
+# /grants history <player>: first a message with a button per category,
+# then clicking one shows those grants a page at a time.
+# "Expired" holds every grant that has ended: ran out or was removed.
+history:
+  menu-title: "Grant History: {player}"
+  menu-text: "Select a category to view history."
+  menu-color: "#5865F2"
+  # {count} = how many grants are in that category
+  active-button: "Active ({count})"
+  expired-button: "Expired ({count})"
+  previous: "Previous"
+  next: "Next"
+  back: "Back"
+  # How many grants per page (max 15).
+  per-page: 8
+  page: "**Page {page} / {pages}**"
+  empty: "Nothing here."
+  never: "Never"
+  active-title: "Active Grants for {player}"
+  expired-title: "Expired Grants for {player}"
+  active-color: "#55FF55"
+  expired-color: "#FF5555"
+  # One line format per kind of grant.
+  # {timestamp} = when it was granted, {ended} = when it ran out / was removed (both in each viewer's own timezone)
+  # {player} {rank} {by} {removed-by} {reason} {duration} {expires}
+  active-entry: "✔ **Timestamp:** {timestamp}\n{player} was granted **{rank}** by {by} for {duration}: '{reason}' (ends {expires})"
+  expired-entry: "✗ **Timestamp:** {timestamp}\n{player} was granted **{rank}** by {by} for {duration}: '{reason}'"
+  removed-entry: "✗ **Timestamp:** {timestamp}\n{player} was granted **{rank}** by {by}: '{reason}' - removed by {removed-by} on {ended}"
+
+# Discord replies. Grant / remove results reuse the text from messages.yml (without colours).
+messages:
+  no-permission: "You don't have a role that can use this command."
+  invalid-duration: "'{input}' is not a valid duration. Use e.g. 30m, 2h, 7d, 1d12h or permanent."
+  not-granted: "{player} has no active {rank} grant."

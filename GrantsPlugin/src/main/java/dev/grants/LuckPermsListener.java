@@ -125,8 +125,10 @@ public final class LuckPermsListener {
             String reason = Text.titleCase(src.console()
                     ? plugin.settings().getString("lp-tracking.console-reason", "Rank Given By Console")
                     : plugin.settings().getString("lp-tracking.command-reason", "Done By LuckPerms Command"));
-            plugin.store().add(new Grant(UUID.randomUUID(), uuid, name, group, src.name(),
-                    grantedAt, expiresAt, reason, Grant.Status.ACTIVE, 0, null));
+            Grant grant = new Grant(UUID.randomUUID(), uuid, name, group, src.name(),
+                    grantedAt, expiresAt, reason, Grant.Status.ACTIVE, 0, null);
+            plugin.store().add(grant);
+            plugin.discordBot().logGrant(grant, true, null);
         }), DELAY_TICKS);
     }
 

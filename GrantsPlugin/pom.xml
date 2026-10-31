@@ -27,12 +27,35 @@
             <artifactId>spigot-api</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+            <!-- No longer downloadable, and not used by this plugin. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>net.md-5</groupId>
+                    <artifactId>bungeecord-chat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
             <version>5.4</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- Discord bot. Voice support (opus, tink) is left out: the bot only uses slash commands. -->
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>5.6.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.crypto.tink</groupId>
+                    <artifactId>tink</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -44,5 +67,53 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <plugins>
+            <!-- Bundles JDA into the jar, moved under dev.grants.libs so it can't clash with other plugins. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation><pattern>net.dv8tion</pattern><shadedPattern>dev.grants.libs.dv8tion</shadedPattern></relocation>
+                                <relocation><pattern>okhttp3</pattern><shadedPattern>dev.grants.libs.okhttp3</shadedPattern></relocation>
+                                <relocation><pattern>okio</pattern><shadedPattern>dev.grants.libs.okio</shadedPattern></relocation>
+                                <relocation><pattern>kotlin</pattern><shadedPattern>dev.grants.libs.kotlin</shadedPattern></relocation>
+                                <relocation><pattern>com.fasterxml</pattern><shadedPattern>dev.grants.libs.fasterxml</shadedPattern></relocation>
+                                <relocation><pattern>com.neovisionaries</pattern><shadedPattern>dev.grants.libs.neovisionaries</shadedPattern></relocation>
+                                <relocation><pattern>gnu.trove</pattern><shadedPattern>dev.grants.libs.trove</shadedPattern></relocation>
+                                <relocation><pattern>org.apache.commons.collections4</pattern><shadedPattern>dev.grants.libs.collections4</shadedPattern></relocation>
+                                <relocation><pattern>org.slf4j</pattern><shadedPattern>dev.grants.libs.slf4j</shadedPattern></relocation>
+                                <relocation><pattern>org.jetbrains</pattern><shadedPattern>dev.grants.libs.jetbrains</shadedPattern></relocation>
+                                <relocation><pattern>org.intellij</pattern><shadedPattern>dev.grants.libs.intellij</shadedPattern></relocation>
+                            </relocations>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/*.kotlin_module</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>

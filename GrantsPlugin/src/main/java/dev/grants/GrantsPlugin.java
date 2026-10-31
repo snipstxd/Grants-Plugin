@@ -1,6 +1,7 @@
 package dev.grants;
 
 import dev.grants.command.GrantsCommand;
+import dev.grants.discord.DiscordBot;
 import dev.grants.gui.MenuListener;
 import dev.grants.model.GrantStore;
 import dev.grants.storage.SqlDatabase;
@@ -38,6 +39,7 @@ public final class GrantsPlugin extends JavaPlugin {
     private final ConfigFile durations = new ConfigFile(this, "durations.yml");
     private final ConfigFile reasons = new ConfigFile(this, "reasons.yml");
     private final ConfigFile database = new ConfigFile(this, "database.yml");
+    private final ConfigFile discord = new ConfigFile(this, "discord.yml", true);
 
     /** Last cross-server message seen (only touched on the database thread). */
     private volatile long lastMessageId;
@@ -61,6 +63,7 @@ public final class GrantsPlugin extends JavaPlugin {
     private GrantService service;
     private ChatInput chatInput;
     private LuckPermsListener lpListener;
+    private DiscordBot discordBot;
 
     @Override
     public void onEnable() {
@@ -103,12 +106,15 @@ public final class GrantsPlugin extends JavaPlugin {
         service.loadGroups();
         getLogger().info("Running on Minecraft " + Version.describe()
                 + (Version.legacyMaterials() ? " (legacy item names)" : ""));
+        discordBot = new DiscordBot(this);
+        discordBot.start();
         // Flip timed-out grants to "expired" every 10 seconds.
         Bukkit.getScheduler().runTaskTimer(this, () -> store.tickExpiry(System.currentTimeMillis()), 20L, 200L);
     }
 
     @Override
     public void onDisable() {
+        if (discordBot != null) discordBot.stop();
         if (store != null) {
             store.save();
             if (store.database() != null) store.database().close();
@@ -248,6 +254,9 @@ public final class GrantsPlugin extends JavaPlugin {
         ranks.load();
         durations.load();
         reasons.load();
+        DiscordBot.migrate(this);
+        discord.load();
+        if (discordBot != null) discordBot.reload();
 
         Text.configureDates(settings().getString("date-format"), settings().getString("timezone"));
         ConfigurationSection t = messages().getConfigurationSection("time");
@@ -265,6 +274,7 @@ public final class GrantsPlugin extends JavaPlugin {
     public YamlConfiguration ranks() { return ranks.get(); }
     public YamlConfiguration durations() { return durations.get(); }
     public YamlConfiguration reasons() { return reasons.get(); }
+    public YamlConfiguration discord() { return discord.get(); }
     public ConfigFile ranksFile() { return ranks; }
 
     /**
@@ -329,6 +339,7 @@ public final class GrantsPlugin extends JavaPlugin {
     public GrantService service() { return service; }
     public ChatInput chatInput() { return chatInput; }
     public LuckPermsListener lpListener() { return lpListener; }
+    public DiscordBot discordBot() { return discordBot; }
 
     public void sync(Runnable task) {
         if (!isEnabled()) return;

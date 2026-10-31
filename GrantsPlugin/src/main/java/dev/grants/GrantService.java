@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -86,6 +87,11 @@ public final class GrantService {
                 .sorted(Comparator.comparingInt((Group g) -> g.getWeight().orElse(0)).reversed()
                         .thenComparing(Group::getName))
                 .collect(Collectors.toList());
+    }
+
+    /** The "server" setting from LuckPerms' config.yml ("global" when it hasn't been set). */
+    public String luckPermsServerName() {
+        return lp.getServerName();
     }
 
     public Group group(String name) {
@@ -219,23 +225,67 @@ public final class GrantService {
                 "rank", displayName(group), "prefix", prefixOrName(group));
     }
 
-    public void grant(final Player granter, final Target target, final String group, final long duration, final String reason) {
-        if (!canManage(granter, group)) {
-            plugin.sound(granter, "error");
-            plugin.send(granter, "rank-too-high");
+
+    /** Whoever asked for a grant or removal: a player in a menu, or someone on Discord. */
+    public interface Actor {
+        /** Saved as "granted by" / "removed by". */
+        String name();
+
+        /** Rank-hierarchy check. Discord users are limited by their role instead. */
+        boolean canManage(String group);
+
+        /** Reports a messages.yml entry back to them. */
+        void reply(boolean success, String key, String... placeholders);
+
+        /** Name of the Discord server this came from (discord.yml), or null if it was done in-game. */
+        default String discordServer() {
+            return null;
+        }
+    }
+
+    /** A player: rank hierarchy applies, replies are chat messages with a sound. */
+    public Actor actor(final Player player) {
+        return new Actor() {
+            @Override
+            public String name() {
+                return player.getName();
+            }
+
+            @Override
+            public boolean canManage(String group) {
+                return GrantService.this.canManage(player, group);
+            }
+
+            @Override
+            public void reply(boolean success, String key, String... placeholders) {
+                if (!player.isOnline()) return;
+                plugin.sound(player, success ? "success" : "error");
+                plugin.send(player, key, placeholders);
+            }
+        };
+    }
+
+    public void grant(Player granter, Target target, String group, long duration, String reason) {
+        grant(actor(granter), target, group, duration, reason);
+    }
+
+    public void grant(final Actor granter, final Target target, final String group, final long duration, final String reason) {
+        if (!granter.canManage(group)) {
+            granter.reply(false, "rank-too-high");
             return;
         }
         // Last check right before applying: another staff member (on any server) may have just granted it.
         checkAlreadyHas(target, group, (has, name) -> {
             if (has) {
-                if (granter.isOnline()) sayAlreadyHas(granter, name, group);
+                granter.reply(false, "already-granted", "player", name,
+                        "rank", displayName(group), "prefix", prefixOrName(group));
                 return;
             }
             apply(granter, target, group, duration, reason);
         });
     }
 
-    private void apply(Player granter, Target target, String group, long duration, String reason) {
+    private void apply(Actor granter, Target target, String group, long duration, String reason) {
         long now = System.currentTimeMillis();
         long expiresAt = duration > 0 ? now + duration : 0;
 
@@ -249,14 +299,14 @@ public final class GrantService {
         }).whenComplete((v, ex) -> plugin.sync(() -> {
             if (ex != null) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to grant " + group + " to " + target.name(), ex);
-                plugin.sound(granter, "error");
-                plugin.send(granter, "error");
+                granter.reply(false, "error");
                 return;
             }
-            plugin.store().add(new Grant(UUID.randomUUID(), target.uuid(), target.name(), group, granter.getName(),
-                    now, expiresAt, reason, Grant.Status.ACTIVE, 0, null));
-            plugin.sound(granter, "success");
-            plugin.send(granter, "granted",
+            Grant grant = new Grant(UUID.randomUUID(), target.uuid(), target.name(), group, granter.name(),
+                    now, expiresAt, reason, Grant.Status.ACTIVE, 0, null);
+            plugin.store().add(grant);
+            plugin.discordBot().logGrant(grant, false, granter.discordServer());
+            granter.reply(true, "granted",
                     "player", coloredName(target.name(), prefixBefore.get()),
                     "prefix", prefixOrName(group),
                     "rank", displayName(group),
@@ -269,7 +319,7 @@ public final class GrantService {
                         "rank", displayName(group),
                         "duration", Durations.format(duration)));
             }
-            plugin.getLogger().info(granter.getName() + " granted " + group + " to " + target.name()
+            plugin.getLogger().info(granter.name() + " granted " + group + " to " + target.name()
                     + " for " + Durations.format(duration) + " (" + reason + ")");
         }));
     }
@@ -290,9 +340,19 @@ public final class GrantService {
             plugin.send(remover, "grant-not-active");
             return;
         }
+        remove(actor(remover), Collections.singletonList(grant));
+    }
+
+    /** Removes active grants that all give the same rank to the same player. */
+    public void remove(final Actor remover, final List<Grant> grants) {
+        final Grant first = grants.get(0);
+        if (!remover.canManage(first.group())) {
+            remover.reply(false, "remove-too-high");
+            return;
+        }
         // If other active grants give the same rank, keep the node alive for the longest of them.
-        List<Grant> others = plugin.store().active(grant.target()).stream()
-                .filter(o -> o != grant && o.group().equalsIgnoreCase(grant.group()))
+        List<Grant> others = plugin.store().active(first.target()).stream()
+                .filter(o -> !grants.contains(o) && o.group().equalsIgnoreCase(first.group()))
                 .collect(Collectors.toList());
         Long keepExpiry = null;
         if (!others.isEmpty()) {
@@ -301,33 +361,35 @@ public final class GrantService {
         }
         final Long keep = keepExpiry;
 
-        markOwnChange(grant.target(), grant.group());
+        markOwnChange(first.target(), first.group());
         AtomicReference<String> prefixBefore = new AtomicReference<>();
-        lp.getUserManager().modifyUser(grant.target(), user -> {
+        lp.getUserManager().modifyUser(first.target(), user -> {
             prefixBefore.set(user.getCachedData().getMetaData().getPrefix());
             user.data().clear(n -> n instanceof InheritanceNode
-                    && ((InheritanceNode) n).getGroupName().equalsIgnoreCase(grant.group())
+                    && ((InheritanceNode) n).getGroupName().equalsIgnoreCase(first.group())
                     && n.getContexts().isEmpty());
             if (keep != null) {
-                InheritanceNode.Builder node = InheritanceNode.builder(grant.group());
+                InheritanceNode.Builder node = InheritanceNode.builder(first.group());
                 if (keep > 0) node.expiry(keep / 1000L);
                 user.data().add(node.build());
             }
         }).whenComplete((v, ex) -> plugin.sync(() -> {
             if (ex != null) {
-                plugin.getLogger().log(Level.SEVERE, "Failed to remove " + grant.group() + " from " + grant.targetName(), ex);
-                plugin.sound(remover, "error");
-                plugin.send(remover, "error");
+                plugin.getLogger().log(Level.SEVERE, "Failed to remove " + first.group() + " from " + first.targetName(), ex);
+                remover.reply(false, "error");
                 return;
             }
-            grant.remove(remover.getName(), System.currentTimeMillis());
-            plugin.store().update(grant);
-            plugin.sound(remover, "success");
-            plugin.send(remover, "removed",
-                    "player", coloredName(grant.targetName(), prefixBefore.get()),
-                    "prefix", prefixOrName(grant.group()),
-                    "rank", displayName(grant.group()));
-            plugin.getLogger().info(remover.getName() + " removed " + grant.group() + " from " + grant.targetName());
+            long now = System.currentTimeMillis();
+            for (Grant grant : grants) {
+                grant.remove(remover.name(), now);
+                plugin.store().update(grant);
+            }
+            plugin.discordBot().logRemoval(grants, remover.name(), remover.discordServer());
+            remover.reply(true, "removed",
+                    "player", coloredName(first.targetName(), prefixBefore.get()),
+                    "prefix", prefixOrName(first.group()),
+                    "rank", displayName(first.group()));
+            plugin.getLogger().info(remover.name() + " removed " + first.group() + " from " + first.targetName());
         }));
     }
 }

@@ -8,6 +8,7 @@
 #    durations.yml  - the time buttons in the duration menu
 #    reasons.yml    - the reason buttons in the reason menu
 #    database.yml   - local file or shared MySQL database (cross-server sync)
+#    discord.yml    - Discord bot token + roles that can use /grants on Discord
 #    grants.yml     - saved grant history when database.yml uses "local"
 #
 #  After editing any file, run /grants reload
