@@ -34,9 +34,11 @@ public final class GrantsCommand implements TabExecutor {
             "- Version: &b&l1.1.1"));
 
     private final GrantsPlugin plugin;
+    private final ConsoleCommands console;
 
     public GrantsCommand(GrantsPlugin plugin) {
         this.plugin = plugin;
+        this.console = new ConsoleCommands(plugin);
     }
 
     @Override
@@ -55,6 +57,10 @@ public final class GrantsCommand implements TabExecutor {
         }
         switch (sub) {
             case "add":
+                if (!(sender instanceof Player)) {
+                    console.add(sender, label, args);
+                    break;
+                }
                 withTarget(sender, label, sub, args, (p, t) ->
                         plugin.service().loadGroups().whenComplete((v, ex) -> plugin.service().refresh(t.uuid(), () -> {
                             if (!p.isOnline()) return;
@@ -70,6 +76,10 @@ public final class GrantsCommand implements TabExecutor {
                         })));
                 break;
             case "remove":
+                if (!(sender instanceof Player)) {
+                    console.remove(sender, label, args);
+                    break;
+                }
                 withTarget(sender, label, sub, args, (p, t) ->
                         plugin.service().refresh(t.uuid(), () -> {
                             if (!p.isOnline()) return;
@@ -85,6 +95,10 @@ public final class GrantsCommand implements TabExecutor {
                         }));
                 break;
             case "history":
+                if (!(sender instanceof Player)) {
+                    console.history(sender, label, args);
+                    break;
+                }
                 withTarget(sender, label, sub, args, (p, t) ->
                         plugin.service().refresh(t.uuid(), () -> {
                             if (p.isOnline()) new HistoryMenu(plugin, t).open(p);
@@ -158,7 +172,11 @@ public final class GrantsCommand implements TabExecutor {
     /** Help text comes from messages.yml -> help; each command's part only shows with its permission. */
     private void help(CommandSender sender, String label) {
         plugin.sendLines(sender, "help.header", "label", label);
+        // The console types add / remove / history out in full, so it gets its own text for those.
+        boolean player = sender instanceof Player;
+        if (!player) plugin.sendLines(sender, "help.console", "label", label);
         for (String sub : SUBCOMMANDS) {
+            if (!player && (sub.equals("add") || sub.equals("remove") || sub.equals("history"))) continue;
             if (sender.hasPermission("grants." + sub)) plugin.sendLines(sender, "help." + sub, "label", label);
         }
         plugin.sendLines(sender, "help.footer", "label", label);
@@ -182,6 +200,12 @@ public final class GrantsCommand implements TabExecutor {
             }
         } else if (args.length == 3 && (args[0].equalsIgnoreCase("color") || args[0].equalsIgnoreCase("colour"))) {
             options.addAll(Items.colorNames());
+        } else if (!(sender instanceof Player) && args.length == 3
+                && (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("remove"))) {
+            for (Group g : plugin.service().grantableGroups()) options.add(g.getName());
+        } else if (!(sender instanceof Player) && args.length == 4 && args[0].equalsIgnoreCase("add")) {
+            options.addAll(plugin.durations().getStringList("presets"));
+            options.add("permanent");
         }
         String last = args[args.length - 1].toLowerCase(Locale.ROOT);
         options.removeIf(o -> !o.toLowerCase(Locale.ROOT).startsWith(last));

@@ -42,6 +42,9 @@ lp-tracking:
   # Reason shown for ranks given with /lp from the console.
   console-reason: "Rank Given By Console"
 
+# Shown as "granted by" / "removed by" for grants made from the console.
+console-name: "Console"
+
 # The word players type in chat to back out of typing a custom duration or reason.
 cancel-word: "cancel"
 

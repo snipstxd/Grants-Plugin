@@ -55,12 +55,37 @@ error: "&cSomething went wrong talking to LuckPerms. Check the console."
 usage-player: "&cUsage: /{label} {command} <player>"
 usage-color: "&cUsage: /{label} color <rank> <color>"
 
+# --- Console ---------------------------------------------------------
+# From the console (or a command block), add / remove / history are typed out in full.
+console-usage-add: "&cUsage: /{label} add <player> <rank> <duration> <reason>"
+console-usage-remove: "&cUsage: /{label} remove <player> <rank>"
+console-invalid-duration: "&c'&f{input}&c' is not a valid duration. Use e.g. &f30m&c, &f2h&c, &f7d&c, &f1d12h &cor &fpermanent&c."
+# {player} {rank}
+console-not-granted: "&f{player} &chas no active &f{rank} &cgrant."
+# /grants history <player> from the console. Sent without the prefix.
+# header: {player} {count}   lines: {rank} {prefix} {player} {granted_by} {granted_on}
+#                                    {expires_on} {reason} {ended_on} {removed_by}
+console-history:
+  header: "&b&lGrant history of {player} &7({count})"
+  empty: "&7No grants."
+  active: "&a[Active] &f{rank} &7by &f{granted_by} &7on &f{granted_on}&7, ends &f{expires_on}&7: &f{reason}"
+  expired: "&c[Expired] &f{rank} &7by &f{granted_by} &7on &f{granted_on}&7, ended &f{ended_on}&7: &f{reason}"
+  removed: "&c[Removed] &f{rank} &7by &f{granted_by} &7on &f{granted_on}&7, removed by &f{removed_by} &7on &f{ended_on}&7: &f{reason}"
+
 # --- /grants help ---------------------------------------------------
 # Each section only shows to players who have permission for that command.
 # These are sent without the prefix above.
 help:
   header:
     - "&b&lGrants Help"
+  # Only shown in the console, instead of the add / remove / history parts below.
+  console:
+    - "&b/{label} add <player> <rank> <duration> <reason>"
+    - "  &7Grants a rank, e.g. /{label} add Steve vip 30d Purchased"
+    - "&b/{label} remove <player> <rank>"
+    - "  &7Removes a player's active grant of that rank."
+    - "&b/{label} history <player>"
+    - "  &7Lists every grant the player has had."
   add:
     - "&b/{label} add <player>"
     - "  &7Opens a menu of your LuckPerms ranks. Pick a rank, then a duration"

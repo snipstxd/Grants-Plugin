@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** The item that describes a single grant (history, remove and confirm menus). Look comes from gui.yml -> grant-item. */
-final class GrantItems {
+public final class GrantItems {
 
     private GrantItems() {}
 
     /** {placeholder} values for a grant, usable in any gui.yml text. */
-    static String[] placeholders(GrantsPlugin plugin, Grant g) {
+    public static String[] placeholders(GrantsPlugin plugin, Grant g) {
         YamlConfiguration gui = plugin.gui();
         String prefix = plugin.service().prefix(g.group());
         return new String[]{
