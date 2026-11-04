@@ -43,7 +43,9 @@ lp-tracking:
   console-reason: "Rank Given By Console"
 
 # Shown as "granted by" / "removed by" for grants made from the console.
-console-name: "Console"
+# {server} = the "server" setting in plugins/LuckPerms/config.yml, e.g. "ffa Console".
+# If LuckPerms has no server name ("global"), it's just "Console".
+console-name: "{server} Console"
 
 # The word players type in chat to back out of typing a custom duration or reason.
 cancel-word: "cancel"
