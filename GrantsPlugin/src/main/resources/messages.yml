@@ -13,6 +13,11 @@
 prefix: "&8&l[&b&lGrants&8&l]&r "
 
 # --- Granting ------------------------------------------------------
+# Sent (without the prefix) to the staff member when /grants add or /grants remove opens.
+# {player} is coloured like the player's LuckPerms rank.
+granting-for: "&aGranting for player: {player}"
+# Sent (without the prefix) when someone closes a /grants add or /grants remove menu with Esc.
+process-cancelled: "&cYou have cancelled the grant process"
 # {player} is coloured like the player's name was BEFORE the grant.
 granted: "&aSuccessfully Granted {player} &arank {prefix} &afor: &c{duration} &areason: &f{reason}"
 # Sent to the player who got the rank (if online). Turn off in config.yml -> notify-player.

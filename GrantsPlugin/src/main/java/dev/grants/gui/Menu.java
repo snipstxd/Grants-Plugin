@@ -72,9 +72,37 @@ public abstract class Menu implements InventoryHolder {
         open(viewer);
     }
 
-    static void closed(Player player, Inventory inventory) {
-        Menu menu = OPEN.get(player.getUniqueId());
-        if (menu != null && menu.inventory == inventory) OPEN.remove(player.getUniqueId());
+    /** True for the steps of /grants add and /grants remove: closing one with Esc cancels the process. */
+    protected boolean process() {
+        return false;
+    }
+
+    /** Players whose menu is being closed by the plugin itself (grant done, typing in chat, ...), not by Esc. */
+    private static final java.util.Set<java.util.UUID> QUIET = new java.util.HashSet<java.util.UUID>();
+
+    /** Closes the player's menu without the "cancelled" message. */
+    public static void closeQuietly(Player player) {
+        QUIET.add(player.getUniqueId());
+        try {
+            player.closeInventory();
+        } finally {
+            QUIET.remove(player.getUniqueId());
+        }
+    }
+
+    static void closed(final Player player, Inventory inventory) {
+        final java.util.UUID uuid = player.getUniqueId();
+        final Menu menu = OPEN.get(uuid);
+        if (menu == null || menu.inventory != inventory) return;
+        OPEN.remove(uuid);
+        if (QUIET.contains(uuid) || !menu.process()) return;
+        // Opening the next step also closes this one, so check next tick: no Grants menu open and not
+        // typing a custom duration / reason means they backed out.
+        menu.plugin.sync(() -> {
+            if (player.isOnline() && !OPEN.containsKey(uuid) && !menu.plugin.chatInput().isWaiting(player)) {
+                menu.plugin.sendRaw(player, "process-cancelled");
+            }
+        });
     }
 
     static void quit(Player player) {

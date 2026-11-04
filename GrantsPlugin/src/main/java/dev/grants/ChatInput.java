@@ -27,6 +27,11 @@ public final class ChatInput implements Listener {
         pending.put(player.getUniqueId(), handler);
     }
 
+    /** Whether the player is being asked to type something in chat. */
+    public boolean isWaiting(Player player) {
+        return pending.containsKey(player.getUniqueId());
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
         Consumer<String> handler = pending.remove(event.getPlayer().getUniqueId());

@@ -31,9 +31,14 @@ public final class ConfirmRemoveMenu extends Menu {
     protected void subjectChanged(Player viewer) {
         Grant fresh = plugin.store().get(grant.id());
         if (fresh == null || !fresh.isActive()) {
-            viewer.closeInventory();
+            closeQuietly(viewer);
             plugin.send(viewer, "grant-not-active");
         }
+    }
+
+    @Override
+    protected boolean process() {
+        return true;
     }
 
     @Override
@@ -45,11 +50,11 @@ public final class ConfirmRemoveMenu extends Menu {
         String icon = Items.material(section("confirm-remove.info"), "BOOK");
         set(slot("confirm-remove.info.slot", 13, size), GrantItems.grant(plugin, grant, icon, Collections.<String>emptyList()));
         set(slot("confirm-remove.cancel.slot", 11, size), item("confirm-remove.cancel", "RED_CONCRETE", ph), p -> {
-            if (plugin.store().active(target.uuid()).isEmpty()) p.closeInventory();
+            if (plugin.store().active(target.uuid()).isEmpty()) closeQuietly(p);
             else new RemoveMenu(plugin, target).open(p);
         });
         set(slot("confirm-remove.confirm.slot", 15, size), item("confirm-remove.confirm", "LIME_CONCRETE", ph), p -> {
-            p.closeInventory();
+            closeQuietly(p);
             plugin.service().remove(p, grant);
         });
     }

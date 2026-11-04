@@ -22,6 +22,11 @@ public final class ReasonMenu extends Menu {
     }
 
     @Override
+    protected boolean process() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         List<String> reasons = plugin.reasons().getStringList("reasons");
         if (reasons.size() > 27) reasons = reasons.subList(0, 27);

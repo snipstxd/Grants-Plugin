@@ -22,6 +22,11 @@ public final class RemoveMenu extends Menu {
     }
 
     @Override
+    protected boolean process() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         List<Grant> grants = plugin.store().active(target.uuid());
         boolean paged = grants.size() > 54;

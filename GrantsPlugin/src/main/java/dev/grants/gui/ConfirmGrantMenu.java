@@ -21,6 +21,11 @@ public final class ConfirmGrantMenu extends Menu {
     }
 
     @Override
+    protected boolean process() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         String[] ph = {
                 "player", target.name(),
@@ -35,7 +40,7 @@ public final class ConfirmGrantMenu extends Menu {
         set(slot("confirm-grant.cancel.slot", 11, size), item("confirm-grant.cancel", "RED_CONCRETE", ph),
                 p -> new ReasonMenu(plugin, target, group, duration).open(p));
         set(slot("confirm-grant.confirm.slot", 15, size), item("confirm-grant.confirm", "LIME_CONCRETE", ph), p -> {
-            p.closeInventory();
+            closeQuietly(p);
             plugin.service().grant(p, target, group, duration, reason);
         });
     }

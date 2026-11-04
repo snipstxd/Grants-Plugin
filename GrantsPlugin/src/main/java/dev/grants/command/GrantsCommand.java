@@ -62,7 +62,11 @@ public final class GrantsCommand implements TabExecutor {
                                 plugin.send(p, "no-ranks");
                                 return;
                             }
-                            new RankSelectMenu(plugin, t).open(p);
+                            plugin.service().coloredName(t, name -> {
+                                if (!p.isOnline()) return;
+                                plugin.sendRaw(p, "granting-for", "player", name);
+                                new RankSelectMenu(plugin, t).open(p);
+                            });
                         })));
                 break;
             case "remove":
@@ -73,7 +77,11 @@ public final class GrantsCommand implements TabExecutor {
                                 plugin.send(p, "no-active-grants", "player", t.name());
                                 return;
                             }
-                            new RemoveMenu(plugin, t).open(p);
+                            plugin.service().coloredName(t, name -> {
+                                if (!p.isOnline()) return;
+                                plugin.sendRaw(p, "granting-for", "player", name);
+                                new RemoveMenu(plugin, t).open(p);
+                            });
                         }));
                 break;
             case "history":

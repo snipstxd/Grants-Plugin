@@ -30,6 +30,11 @@ public final class RankSelectMenu extends Menu {
     }
 
     @Override
+    protected boolean process() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         List<Group> groups = plugin.service().grantableGroups();
         boolean paged = groups.size() > 54;

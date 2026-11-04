@@ -124,6 +124,13 @@ public final class GrantService {
         return (color != null ? color : "&f") + name;
     }
 
+    /** Calls {@code then} on the main thread with the player's name in their LuckPerms colour. */
+    public void coloredName(final Target target, final java.util.function.Consumer<String> then) {
+        lp.getUserManager().loadUser(target.uuid()).whenComplete((user, ex) -> plugin.sync(() ->
+                then.accept(coloredName(target.name(),
+                        user == null ? null : user.getCachedData().getMetaData().getPrefix()))));
+    }
+
     /** Lower-cased names of the groups LuckPerms currently gives this player. */
     public CompletableFuture<Set<String>> currentGroups(UUID uuid) {
         return lp.getUserManager().loadUser(uuid).thenApply(user -> user.getNodes(NodeType.INHERITANCE).stream()

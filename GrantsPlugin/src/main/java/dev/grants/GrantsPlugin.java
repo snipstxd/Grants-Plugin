@@ -363,6 +363,12 @@ public final class GrantsPlugin extends JavaPlugin {
         return messages().getString("prefix", "") + msg;
     }
 
+    /** Sends a messages.yml entry without the prefix. Empty messages are not sent. */
+    public void sendRaw(CommandSender to, String key, String... placeholders) {
+        String msg = messages().getString(key, "");
+        if (!msg.isEmpty()) to.sendMessage(Text.color(Text.apply(msg, placeholders)));
+    }
+
     /** Sends each line of a messages.yml list as-is (no prefix). */
     public void sendLines(CommandSender to, String key, String... placeholders) {
         List<String> lines = messages().getStringList(key);

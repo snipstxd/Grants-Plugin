@@ -21,6 +21,11 @@ public final class DurationMenu extends Menu {
     }
 
     @Override
+    protected boolean process() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         List<Long> presets = new ArrayList<>();
         for (String s : plugin.durations().getStringList("presets")) {
