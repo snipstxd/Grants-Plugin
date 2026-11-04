@@ -65,8 +65,13 @@ public final class GrantsPlugin extends JavaPlugin {
     private LuckPermsListener lpListener;
     private DiscordBot discordBot;
 
+    /** Kept here because java.util.logging only holds loggers weakly; the level would be lost otherwise. */
+    private static final java.util.logging.Logger JDA_LOGGER = java.util.logging.Logger.getLogger("dev.grants.libs.dv8tion");
+
     @Override
     public void onEnable() {
+        // The Discord bot (JDA) logs a lot at INFO; only show its warnings and errors.
+        JDA_LOGGER.setLevel(java.util.logging.Level.WARNING);
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider == null) {
             getLogger().severe("LuckPerms not found - disabling.");
