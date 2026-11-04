@@ -53,8 +53,6 @@ public final class Credits {
     public static void banner(JavaPlugin plugin) {
         CommandSender console = Bukkit.getConsoleSender();
         String version = version(plugin);
-        String ip = Bukkit.getIp();
-        if (ip == null || ip.trim().isEmpty()) ip = "0.0.0.0";
 
         send(console, "");
         for (String line : LOGO) send(console, "&a" + line);
@@ -67,7 +65,9 @@ public final class Credits {
         send(console, "&aJava Version: &f" + System.getProperty("java.version"));
         send(console, "&aOS: &f" + System.getProperty("os.name"));
         send(console, "&aServer Version: &f" + Bukkit.getVersion());
-        send(console, "&aServer IP: &f" + ip + ":" + Bukkit.getPort());
+        // Only shown when server.properties has a server-ip set.
+        String ip = Bukkit.getIp();
+        if (ip != null && !ip.trim().isEmpty()) send(console, "&aServer IP: &f" + ip.trim() + ":" + Bukkit.getPort());
         send(console, "");
     }
 
