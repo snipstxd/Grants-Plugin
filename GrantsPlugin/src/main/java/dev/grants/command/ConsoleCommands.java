@@ -89,19 +89,6 @@ final class ConsoleCommands {
         });
     }
 
-    /** config.yml -> console-name with {server} = LuckPerms' "server" setting, e.g. "ffa Console". */
-    private String consoleName() {
-        String format = plugin.settings().getString("console-name", "{server} Console");
-        // "Console" was the first default; treat it as the new one so existing servers get the server name.
-        if (format.equals("Console")) format = "{server} Console";
-        String server = plugin.service().luckPermsServerName();
-        if (server == null || server.trim().isEmpty() || server.equalsIgnoreCase("global")) {
-            // No server name set in LuckPerms: just "Console".
-            return format.replace("{server}", "").trim();
-        }
-        return format.replace("{server}", server).trim();
-    }
-
     private Group grantableGroup(String name) {
         for (Group g : plugin.service().grantableGroups()) if (g.getName().equalsIgnoreCase(name)) return g;
         return null;
@@ -120,7 +107,7 @@ final class ConsoleCommands {
 
     /** The console: no rank hierarchy, saved as config.yml -> console-name. */
     private GrantService.Actor actor(final CommandSender sender) {
-        final String name = consoleName();
+        final String name = plugin.consoleName();
         return new GrantService.Actor() {
             @Override
             public String name() {

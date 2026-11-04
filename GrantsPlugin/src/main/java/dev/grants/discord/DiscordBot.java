@@ -497,13 +497,18 @@ public final class DiscordBot extends ListenerAdapter {
     // ---------------------------------------------------------------- grant log
 
     /** Posts a new grant to log-channel-id. {@code fromLuckPerms} = given with /lp rather than through Grants. */
+    /** This server's console is just "Console" in the log: the footer already names the server. */
+    private String logName(String name) {
+        return name != null && name.equals(plugin.consoleName()) ? "Console" : name;
+    }
+
     public void logGrant(Grant grant, boolean fromLuckPerms, String discordServer) {
         if (fromLuckPerms && !config().getBoolean("log.luckperms-commands", true)) return;
         EmbedBuilder embed = logEmbed("granted", grant, discordServer)
                 .addField(log("duration"), Durations.format(grant.isPermanent() ? 0 : grant.expiresAt() - grant.grantedAt()), true)
                 .addField(log("expires"), grant.isPermanent() ? log("never") : "<t:" + grant.expiresAt() / 1000L + ":R>", true)
                 .addField(log("reason"), field(grant.reason()), false)
-                .addField(log("granted-by"), field(grant.grantedBy()), true);
+                .addField(log("granted-by"), field(logName(grant.grantedBy())), true);
         post(embed);
     }
 
@@ -511,8 +516,8 @@ public final class DiscordBot extends ListenerAdapter {
     public void logRemoval(List<Grant> grants, String removedBy, String discordServer) {
         Grant first = grants.get(0);
         EmbedBuilder embed = logEmbed("removed", first, discordServer)
-                .addField(log("granted-by"), field(first.grantedBy()), true)
-                .addField(log("removed-by"), field(removedBy), true);
+                .addField(log("granted-by"), field(logName(first.grantedBy())), true)
+                .addField(log("removed-by"), field(logName(removedBy)), true);
         post(embed);
     }
 

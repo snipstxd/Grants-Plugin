@@ -387,6 +387,19 @@ public final class GrantsPlugin extends JavaPlugin {
         for (String line : lines) to.sendMessage(Text.color(Text.apply(line, placeholders)));
     }
 
+    /** config.yml -> console-name with {server} = LuckPerms' "server" setting, e.g. "ffa Console". */
+    public String consoleName() {
+        String format = settings().getString("console-name", "{server} Console");
+        // "Console" was the first default; treat it as the new one so existing servers get the server name.
+        if (format.equals("Console")) format = "{server} Console";
+        String server = service().luckPermsServerName();
+        if (server == null || server.trim().isEmpty() || server.equalsIgnoreCase("global")) {
+            // No server name set in LuckPerms: just "Console".
+            return format.replace("{server}", "").trim();
+        }
+        return format.replace("{server}", server).trim();
+    }
+
     public String cancelWord() {
         return settings().getString("cancel-word", "cancel");
     }
