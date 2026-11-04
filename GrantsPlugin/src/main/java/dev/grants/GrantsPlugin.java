@@ -7,6 +7,7 @@ import dev.grants.model.GrantStore;
 import dev.grants.storage.SqlDatabase;
 import dev.grants.storage.StorageSetup;
 import dev.grants.util.ConfigFile;
+import dev.grants.util.Credits;
 import dev.grants.util.Durations;
 import dev.grants.util.Text;
 import dev.grants.util.Version;
@@ -72,6 +73,12 @@ public final class GrantsPlugin extends JavaPlugin {
     public void onEnable() {
         // The Discord bot (JDA) logs a lot at INFO; only show its warnings and errors.
         JDA_LOGGER.setLevel(java.util.logging.Level.WARNING);
+        if (!Credits.intact(this)) {
+            getLogger().severe("plugin.yml has been modified - disabling.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        Credits.banner(this);
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider == null) {
             getLogger().severe("LuckPerms not found - disabling.");

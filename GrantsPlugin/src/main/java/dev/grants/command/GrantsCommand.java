@@ -5,6 +5,7 @@ import dev.grants.GrantsPlugin;
 import dev.grants.gui.HistoryMenu;
 import dev.grants.gui.RankSelectMenu;
 import dev.grants.gui.RemoveMenu;
+import dev.grants.util.Credits;
 import dev.grants.util.Items;
 import dev.grants.util.Text;
 import net.luckperms.api.model.group.Group;
@@ -25,14 +26,6 @@ public final class GrantsCommand implements TabExecutor {
 
     private static final List<String> SUBCOMMANDS = Collections.unmodifiableList(
             Arrays.asList("add", "remove", "history", "color", "reload"));
-    /** Fixed on purpose: /grants info is not editable in any .yml file. */
-    private static final List<String> INFO = Collections.unmodifiableList(Arrays.asList(
-            "&b&lGrants Plugin",
-            "",
-            "- Made By: &b&lSnipst",
-            "",
-            "- Version: &b&l1.1.1"));
-
     private final GrantsPlugin plugin;
     private final ConsoleCommands console;
 
@@ -166,7 +159,8 @@ public final class GrantsCommand implements TabExecutor {
     }
 
     private void info(CommandSender sender) {
-        for (String line : INFO) sender.sendMessage(Text.color(line));
+        // Fixed on purpose: /grants info is not editable in any .yml file.
+        for (String line : Credits.info(plugin)) sender.sendMessage(Text.color(line));
     }
 
     /** Help text comes from messages.yml -> help; each command's part only shows with its permission. */
