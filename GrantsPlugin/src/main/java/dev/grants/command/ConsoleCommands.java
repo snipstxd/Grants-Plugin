@@ -79,7 +79,12 @@ final class ConsoleCommands {
             for (Grant g : grants) {
                 String key = g.isActive() ? "console-history.active"
                         : g.removedBy() != null ? "console-history.removed" : "console-history.expired";
-                plugin.sendRaw(sender, key, GrantItems.placeholders(plugin, g));
+                String[] ph = GrantItems.placeholders(plugin, g);
+                // {rank} in the rank's LuckPerms colour (its colour code wins over the &f before it in messages.yml).
+                for (int i = 0; i < ph.length; i += 2) {
+                    if (ph[i].equals("rank")) ph[i + 1] = plugin.service().coloredRank(g.group());
+                }
+                plugin.sendRaw(sender, key, ph);
             }
         });
     }

@@ -112,6 +112,12 @@ public final class GrantService {
         return d != null ? d : g.getName();
     }
 
+    /** Rank name in the colour its LuckPerms prefix ends with (white if it has none). */
+    public String coloredRank(String groupName) {
+        String color = Text.lastColor(prefix(groupName));
+        return (color != null ? color : "&f") + displayName(groupName);
+    }
+
     /** Prefix if the rank has one, otherwise its name. Used in chat messages. */
     public String prefixOrName(String groupName) {
         String p = prefix(groupName);

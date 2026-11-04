@@ -63,7 +63,7 @@ console-invalid-duration: "&c'&f{input}&c' is not a valid duration. Use e.g. &f3
 # {player} {rank}
 console-not-granted: "&f{player} &chas no active &f{rank} &cgrant."
 # /grants history <player> from the console. Sent without the prefix.
-# header: {player} {count}   lines: {rank} {prefix} {player} {granted_by} {granted_on}
+# header: {player} {count}   lines: {rank} (in the rank's LuckPerms colour) {prefix} {player} {granted_by} {granted_on}
 #                                    {expires_on} {reason} {ended_on} {removed_by}
 console-history:
   header: "&b&lGrant history of {player} &7({count})"
