@@ -60,6 +60,8 @@ public final class SqlDatabase {
     private final String history;
     private final String messages;
     private final String colors;
+    /** Messages for players who were offline, kept until they next join any server. */
+    private final String pending;
 
     /** Messages addressed to this id are instructions for every server, not chat for a player. */
     public static final UUID BROADCAST = new UUID(0L, 0L);
@@ -95,6 +97,7 @@ public final class SqlDatabase {
         this.history = prefix + "history";
         this.messages = prefix + "messages";
         this.colors = prefix + "colors";
+        this.pending = prefix + "pending";
     }
 
     // ---------------------------------------------------------------- setup
@@ -152,6 +155,11 @@ public final class SqlDatabase {
                     + "rank_group VARCHAR(64) NOT NULL PRIMARY KEY, "
                     + "color VARCHAR(16) NOT NULL)");
             s.executeUpdate("CREATE TABLE IF NOT EXISTS " + messages + " ("
+                    + "id " + idCol + ", "
+                    + "target VARCHAR(36) NOT NULL, "
+                    + "message TEXT NOT NULL, "
+                    + "created BIGINT NOT NULL)");
+            s.executeUpdate("CREATE TABLE IF NOT EXISTS " + pending + " ("
                     + "id " + idCol + ", "
                     + "target VARCHAR(36) NOT NULL, "
                     + "message TEXT NOT NULL, "
@@ -388,6 +396,63 @@ public final class SqlDatabase {
             }
         }
         return out;
+    }
+
+    // ---------------------------------------------------------------- messages for offline players
+
+    public void addPending(UUID target, String text) throws SQLException {
+        try (PreparedStatement ps = conn().prepareStatement(
+                "INSERT INTO " + pending + " (target, message, created) VALUES (?, ?, ?)")) {
+            ps.setString(1, target.toString());
+            ps.setString(2, text);
+            ps.setLong(3, System.currentTimeMillis());
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Removes and returns the player's saved messages, oldest first. Each one is only returned if this call
+     * deleted it, so two servers can never both deliver the same message.
+     */
+    public List<String> takePending(UUID target) throws SQLException {
+        List<Long> ids = new ArrayList<Long>();
+        List<String> texts = new ArrayList<String>();
+        try (PreparedStatement ps = conn().prepareStatement(
+                "SELECT id, message FROM " + pending + " WHERE target = ? ORDER BY id")) {
+            ps.setString(1, target.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getLong(1));
+                    texts.add(rs.getString(2));
+                }
+            }
+        }
+        List<String> out = new ArrayList<String>();
+        try (PreparedStatement ps = conn().prepareStatement("DELETE FROM " + pending + " WHERE id = ?")) {
+            for (int i = 0; i < ids.size(); i++) {
+                ps.setLong(1, ids.get(i));
+                if (ps.executeUpdate() > 0) out.add(texts.get(i));
+            }
+        }
+        return out;
+    }
+
+    /** Deletes one saved copy of this message. True if there was one (so the caller may show it). */
+    public boolean claimPending(UUID target, String text) throws SQLException {
+        Long id = null;
+        try (PreparedStatement ps = conn().prepareStatement(
+                "SELECT id FROM " + pending + " WHERE target = ? AND message = ? ORDER BY id")) {
+            ps.setString(1, target.toString());
+            ps.setString(2, text);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) id = rs.getLong(1);
+            }
+        }
+        if (id == null) return false;
+        try (PreparedStatement ps = conn().prepareStatement("DELETE FROM " + pending + " WHERE id = ?")) {
+            ps.setLong(1, id);
+            return ps.executeUpdate() > 0;
+        }
     }
 
     /** Old messages have been seen by every server by now. */

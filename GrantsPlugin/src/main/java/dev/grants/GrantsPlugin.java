@@ -44,6 +44,7 @@ public final class GrantsPlugin extends JavaPlugin {
 
     /** Last cross-server message seen (only touched on the database thread). */
     private volatile long lastMessageId;
+    private PendingMessages pending;
     /** Identifies this server in broadcasts so it can skip its own. */
     private final String serverId = UUID.randomUUID().toString();
     private volatile long lastCleanup;
@@ -100,6 +101,7 @@ public final class GrantsPlugin extends JavaPlugin {
         } else {
             store.loadLocal();
         }
+        pending = new PendingMessages(this);
         service = new GrantService(this, provider.getProvider());
         chatInput = new ChatInput(this);
         lpListener = new LuckPermsListener(this);
@@ -107,6 +109,7 @@ public final class GrantsPlugin extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new MenuListener(this), this);
         Bukkit.getPluginManager().registerEvents(chatInput, this);
+        Bukkit.getPluginManager().registerEvents(pending, this);
 
         GrantsCommand command = new GrantsCommand(this);
         PluginCommand cmd = getCommand("grants");
@@ -153,7 +156,7 @@ public final class GrantsPlugin extends JavaPlugin {
                                     continue;
                                 }
                                 Player p = Bukkit.getPlayer(m.target);
-                                if (p != null) p.sendMessage(Text.color(m.text));
+                                if (p != null) deliverClaimed(sql, p, m.text);
                             }
                         });
                     }
@@ -251,8 +254,22 @@ public final class GrantsPlugin extends JavaPlugin {
             online.sendMessage(Text.color(message));
             return;
         }
+        // Saved until they join; also sent live in case they're on another server right now.
+        // Whichever delivers it first deletes the saved copy, so they only see it once.
+        pending.add(player, message);
         final SqlDatabase sql = store.database();
         if (sql != null) sql.async(() -> sql.sendMessage(player, message));
+    }
+
+    /** Shows a message another server sent live, unless the player already got it (e.g. when joining). */
+    private void deliverClaimed(final SqlDatabase sql, final Player player, final String text) {
+        sql.async(() -> {
+            if (sql.claimPending(player.getUniqueId(), text)) {
+                sync(() -> {
+                    if (player.isOnline()) player.sendMessage(Text.color(text));
+                });
+            }
+        });
     }
 
     // ---------------------------------------------------------------- files
