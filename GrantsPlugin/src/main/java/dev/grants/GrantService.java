@@ -55,7 +55,10 @@ public final class GrantService {
 
     // ---------------------------------------------------------------- lookups
 
-    /** Finds a player by name: online first, then LuckPerms' records, then Bukkit's. Completes with null if unknown. */
+    /**
+     * Finds a player by name, ignoring capitals: online first, then LuckPerms' records, then Bukkit's.
+     * The Target always has the player's real name ("snipst" -> "Snipst"). Completes with null if unknown.
+     */
     public CompletableFuture<Target> resolve(String name) {
         Player online = Bukkit.getPlayerExact(name);
         if (online != null) return CompletableFuture.completedFuture(new Target(online.getUniqueId(), online.getName()));
@@ -63,7 +66,8 @@ public final class GrantService {
         UserManager users = lp.getUserManager();
         return users.lookupUniqueId(name).thenCompose(uuid -> {
             if (uuid != null) {
-                return users.lookupUsername(uuid).thenApply(n -> new Target(uuid, n != null ? n : name));
+                // LuckPerms keeps usernames in lowercase, so prefer the name the server saw them join with.
+                return users.lookupUsername(uuid).thenApply(n -> new Target(uuid, realName(uuid, n != null ? n : name)));
             }
             return CompletableFuture.supplyAsync(() -> {
                 @SuppressWarnings("deprecation")
@@ -72,6 +76,12 @@ public final class GrantService {
                 return new Target(op.getUniqueId(), op.getName() != null ? op.getName() : name);
             });
         });
+    }
+
+    /** The player's name with its real capitals, from the server's own records; {@code fallback} if it has none. */
+    private static String realName(UUID uuid, String fallback) {
+        String n = Bukkit.getOfflinePlayer(uuid).getName();
+        return n != null && n.equalsIgnoreCase(fallback) ? n : fallback;
     }
 
     public CompletableFuture<Void> loadGroups() {
